@@ -1,0 +1,13 @@
+Wait for a port to be responsive (uses `netcat` to scan the port), or until a timeout reached.
+Example:
+```groovy
+waitForPort host: 'the-host', port: 1234
+```
+
+**Arguments:**
+* `host` (string) -
+  the host or IP
+* `port` (int) -
+  the port to scan
+* `timeout` (map) -
+  *(optional)* the timeout settings (default: 20 seconds). See `timeout` basic step for more details.

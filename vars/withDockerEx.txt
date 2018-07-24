@@ -1,0 +1,81 @@
+Start a docker extension context. Provides a docker extension handle as an argument to the closure.
+```groovy
+withDockerEx { dockerEx ->
+  // do something...
+}
+```
+The context is closed once the closure scope ends. This includes:
+* Logout from any logged in registries
+* Stop and remove any running composition
+* Remove created networks
+
+(Only for resources managed by this docker extension context)
+
+Example:
+```groovy
+withDockerEx { dockerEx ->
+  // Assuming there is a docker compose file named 'my-project.yml' in the current directory
+  def myProj = dockerEx.compose('my-project', [file: 'my-project.yml'])
+  // Spin the composition up and print its status
+  myProj.up().ps()
+  // Get the public gateway IP of the composition
+  def myProjIp = myProj.inspectGateway()
+  // Wait for a specific port in the composition to be responsive
+  waitForPort host: myProjIp, port: 8080
+
+  // Do something with the composition ...
+
+  // Stop and remove the composition (this is optional, since it is done automatically when the closure ends)
+  myProj.down()
+}
+// (The composition is stopped and removed automatically once the closure above ends)
+```
+
+**DockerEx**
+* `DockerExRegistry registry(String name)` -
+  Get a docker registry handle for the given name
+* `DockerExCompose compose(String name [, Map config = [:]])` -
+  Get a docker compose handle for the given name
+* `DockerExNetwork network(String name)` -
+  Get a docker network handle for the given name
+* `close()` -
+  Close the docker handle.
+  This also closes all other handles managed by this docker handle.
+
+**DockerExRegistry**
+* `DockerExRegistry login(String credentialsId)` -
+  Login to this registry using the given credentials ID
+* `DockerExRegistry logout()` -
+  Logout from this registry
+
+**DockerExCompose**
+* `DockerExCompose up()` -
+  Start this composition
+* `DockerExCompose ps()` -
+  Print the status of the containers in this composition
+* `DockerExCompose stop()` -
+  Stop this composition
+* `DockerExCompose down()` -
+  Stop and remove the containers in this composition
+* `String inspectGateway()` -
+  Inspect the gateway IP of the network of this composition
+* `ArrayMap inspectContainersIps()` -
+  Inspect the network of this composition, returns a map of each container name and its IP
+* `DockerExNetwork defaultNetwork` -
+  The default network of this composition
+* `String logs()` -
+  Read the docker compose logs
+* `DockerExCompose archiveLogs()` -
+  Read the logs of this composition and archive it in a file attached to the current build run
+
+**DockerExNetwork**
+* `boolean wasManuallyCreated()` -
+  Whether this network was created manually (i.e. using the `create` method) or by other means
+* `DockerExNetwork create([Map config = [:]])` -
+  Create this network, optionally gets a config map
+* `DockerExNetwork remove()` -
+  Remove this network
+* `String inspectGateway()` -
+  Inspect the gateway IP of this network
+* `ArrayMap inspectContainersIps()` -
+  Inspect this network, returns a map of each container name and its IP
