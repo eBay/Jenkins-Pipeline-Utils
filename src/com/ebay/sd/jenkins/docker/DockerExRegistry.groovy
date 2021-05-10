@@ -35,7 +35,7 @@ class DockerExRegistry implements Serializable {
      */
     DockerExRegistry login(String credentialsId) {
         script.withUsernamePassword(credentialsId: credentialsId) { username, password ->
-            script.sh "docker login -u ${username} -p ${password} -e jenkins@ebay.com ${this.name}"
+            script.sh "docker login -u ${username} -p ${password} -e dummyJenkins@ebay.com ${this.name}"
         }
         this
     }
